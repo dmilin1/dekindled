@@ -4,7 +4,7 @@ A Chrome extension designed to build epubs from Amazon's Kindle Reader website.
 
 It injects into the Kindle Reader website to capture and extract base64 blob content, before the blobs get revoked.
 
-Inspired by my desire to read the books I've purchased through [Inkwell](https://inkwell.app), an ebook reader app I built for myself.
+Inspired by my desire to read the books I've purchased through [Inkwell](https://github.com/dmilin1/inkwell/), an ebook reader app I built for myself.
 
 Thanks to [Showdown](https://github.com/showdownjs/showdown) for their markdown to HTML converter.
 
