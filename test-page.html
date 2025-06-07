@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DeKindled Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1976d2;
+        }
+        h1::before {
+            content: '📚 ';
+        }
+        button {
+            background: #1976d2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background: #1565c0;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+        }
+        .blob-url {
+            font-family: monospace;
+            background: #e3f2fd;
+            padding: 2px 5px;
+            border-radius: 3px;
+            word-break: break-all;
+            color: #1976d2;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border: 1px solid #1976d2;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 10px;
+            border: 1px solid #ffc107;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>DeKindled Test Page</h1>
+    
+    <div class="info-box">
+        <p>Use this page to test if DeKindled is properly capturing blob content.</p>
+        <p>When you create blobs, you should see:</p>
+        <ul>
+            <li>Red popups at the top-left showing captured content</li>
+            <li>"📚 DeKindled Active" indicator at bottom-right</li>
+            <li>Captured blobs stored in <code>window.__dekindled.blobs</code></li>
+        </ul>
+    </div>
+    
+    <div class="highlight">
+        <strong>📌 To view captured content:</strong> Click the DeKindled extension icon in your browser toolbar. An overlay will appear showing all captured blobs with download options.
+    </div>
+    
+    <h2>Test Blob Creation</h2>
+    <button onclick="createTextBlob()">Create Text Blob</button>
+    <button onclick="createImageBlob()">Create Image Blob</button>
+    <button onclick="createLargeBlob()">Create Large Blob (1MB)</button>
+    <button onclick="revokeLastBlob()">Revoke Last Blob</button>
+    <button onclick="viewCaptured()">View Captured Count</button>
+    
+    <h2>Test Results</h2>
+    <div id="output">
+        <p>Click the buttons above to create test blobs...</p>
+    </div>
+    
+    <script>
+        let lastBlobUrl = null;
+        const output = document.getElementById('output');
+        
+        function log(message) {
+            const p = document.createElement('p');
+            p.innerHTML = message;
+            output.appendChild(p);
+            console.log(message);
+        }
+        
+        function createTextBlob() {
+            const blob = new Blob(['Hello from DeKindled! This is test content.'], { type: 'text/plain' });
+            lastBlobUrl = URL.createObjectURL(blob);
+            log(`✅ Created text blob: <span class="blob-url">${lastBlobUrl}</span>`);
+            log(`💡 Click the extension icon to see and download this blob`);
+        }
+        
+        function createImageBlob() {
+            // Create a simple 100x100 pixel image
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw DeKindled logo colors
+            ctx.fillStyle = '#1976d2';
+            ctx.fillRect(0, 0, 100, 100);
+            ctx.fillStyle = 'white';
+            ctx.font = '40px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('📚', 50, 50);
+            
+            canvas.toBlob(blob => {
+                lastBlobUrl = URL.createObjectURL(blob);
+                log(`✅ Created image blob: <span class="blob-url">${lastBlobUrl}</span>`);
+                log(`💡 Click the extension icon to see and download this blob`);
+            }, 'image/png');
+        }
+        
+        function createLargeBlob() {
+            const largeArray = new Uint8Array(1024 * 1024); // 1MB
+            for (let i = 0; i < largeArray.length; i++) {
+                largeArray[i] = Math.floor(Math.random() * 256);
+            }
+            const blob = new Blob([largeArray], { type: 'application/octet-stream' });
+            lastBlobUrl = URL.createObjectURL(blob);
+            log(`✅ Created large blob (1MB): <span class="blob-url">${lastBlobUrl}</span>`);
+            log(`💡 Click the extension icon to see and download this blob`);
+        }
+        
+        function revokeLastBlob() {
+            if (lastBlobUrl) {
+                URL.revokeObjectURL(lastBlobUrl);
+                log(`❌ Revoked blob: <span class="blob-url">${lastBlobUrl}</span>`);
+                lastBlobUrl = null;
+            } else {
+                log('⚠️ No blob to revoke. Create one first!');
+            }
+        }
+        
+        function viewCaptured() {
+            if (window.__dekindled && window.__dekindled.blobs) {
+                const count = window.__dekindled.blobs.length;
+                const active = Array.from(window.__dekindled.blobMap.keys()).length;
+                log(`📊 Captured: ${count} total events, ${active} active blobs`);
+                log(`💡 Click the DeKindled extension icon to view and download them`);
+                console.log('DeKindled data:', window.__dekindled);
+            } else {
+                log('⚠️ No DeKindled data found. Make sure the extension is active.');
+            }
+        }
+        
+        // Initial status
+        setTimeout(() => {
+            if (window.__dekindled) {
+                log('✅ DeKindled extension is active and ready!');
+                log('📌 Create some blobs, then click the extension icon to view them.');
+            } else {
+                log('⚠️ Waiting for DeKindled extension to initialize...');
+            }
+        }, 500);
+    </script>
+</body>
+</html> 

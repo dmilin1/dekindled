@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "DeKindled",
+  "version": "1.0",
+  "description": "Extract and save blob content from web readers like Kindle",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png",
+    "1024": "icon.png"
+  },
+  "permissions": [
+    "scripting",
+    "activeTab",
+    "downloads",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://read.amazon.com/*",
+    "https://api.openai.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "DeKindled - Click to manage captured content",
+    "default_icon": {
+      "16": "icon.png",
+      "32": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["https://read.amazon.com/*"],
+      "js": ["inject.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["interceptor.js", "viewer-inject.js", "zip-utils.js"],
+      "matches": ["https://read.amazon.com/*"]
+    }
+  ]
+} 
